@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Promotion Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
+            background: white;
+        }
+        
+        .upload-zone:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+        
+        .upload-zone.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .upload-zone p {
+            margin: 0.5rem 0;
+        }
+        
+        .upload-zone .main-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-zone .hint {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input[type="date"],
+        button {
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+        }
+        
+        input[type="date"] {
+            flex: 1;
+        }
+        
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            padding: 0.75rem 2rem;
+            align-self: flex-end;
+        }
+        
+        button:hover {
+            background: #1d4ed8;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .category-section {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid #e5e5e5;
+            margin-bottom: 0.75rem;
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .header-name {
+            flex: 1;
+        }
+        
+        .header-metric {
+            text-align: right;
+            min-width: 70px;
+        }
+        
+        .promotion-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        
+        .promotion-row:last-child {
+            border-bottom: none;
+        }
+        
+        .promotion-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .promotion-metric {
+            text-align: right;
+            min-width: 70px;
+        }
+        
+        .promotion-metric-label {
+            display: block;
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 2px;
+        }
+        
+        .promotion-metric-value {
+            display: block;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .status-good {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .recommendations-section {
+            margin-top: 3rem;
+        }
+        
+        .recommendations-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+        
+        .recommendation {
+            background: white;
+            border-left: 4px solid #2563eb;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .recommendation.danger {
+            border-left-color: #dc2626;
+        }
+        
+        .recommendation.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .recommendation.success {
+            border-left-color: #16a34a;
+        }
+        
+        .rec-priority {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .rec-number {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+        
+        .rec-action {
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+        
+        .rec-action strong {
+            font-weight: 600;
+        }
+        
+        .rec-why {
+            font-size: 13px;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .rec-why strong {
+            font-weight: 600;
+        }
+        
+        #loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e5e5;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Booking Promotion Analyzer</h1>
+            <p class="subtitle">Upload your CSV and get 5 weekly recommendations</p>
+        </header>
+
+        <div id="uploadZone" class="upload-zone">
+            <p class="main-text">Drag CSV here or click to upload</p>
+            <p class="hint">Kahal_xlsx_-_Promotions.csv</p>
+            <input type="file" id="fileInput" accept=".csv" />
+        </div>
+
+        <div class="controls">
+            <div class="control-group" style="flex: 1;">
+                <label for="dateInput">Current date</label>
+                <input type="date" id="dateInput" />
+            </div>
+            <button onclick="analyzeCSV()">Analyze</button>
+        </div>
+
+        <div id="errorContainer"></div>
+
+        <div id="loading" class="hidden">
+            <p>Analyzing your data...</p>
+        </div>
+
+        <div id="content" class="hidden">
+            <div id="metricsGrid" class="metrics-grid"></div>
+            <div id="categoriesContainer"></div>
+            <div id="recommendationsContainer"></div>
+        </div>
+
+        <footer>
+            <p>Booking Promotion Analyzer • Weekly Tuesday Tool</p>
+        </footer>
+    </div>
+
+    <script>
+        let csvData = null;
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('active');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('active');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('active');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                csvData = event.target.result;
+                uploadZone.innerHTML = `<p class="main-text">✓ File loaded: ${file.name}</p>`;
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                data.push(row);
+            }
+            return data;
+        }
+
+        function getMonthIndex(month) {
+            const months = {
+                ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
+                jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11
+            };
+            return months[month.toLowerCase()] || 0;
+        }
+
+        function analyzeCSV() {
+            const dateStr = document.getElementById('dateInput').value;
+            
+            if (!csvData) {
+                showError('Please upload a CSV file');
+                return;
+            }
+            
+            if (!dateStr) {
+                showError('Please select a date');
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('content').classList.add('hidden');
+
+            setTimeout(() => {
+                try {
+                    const currentDate = new Date(dateStr);
+                    const promotions = parseCSV(csvData);
+                    
+                    const analyzed = promotions.map(promo => {
+                        const startMatch = promo['Periodo de reserva'].match(/(\d{1,2})\s+(\w+)\s+2026/);
+                        const startDate = startMatch ? 
+                            new Date(2026, getMonthIndex(startMatch[2]), parseInt(startMatch[1])) : 
+                            new Date(2026, 0, 1);
+                        const daysActive = Math.max(1, Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24)));
+                        
+                        const reservas = parseInt(promo['Reservas']) || 0;
+                        const noches = parseInt(promo['Noches']) || 0;
+                        const ingresosStr = promo['Ingresos'].replace(/[^\d.]/g, '').replace(/\./g, '').slice(0, -2);
+                        const ingresos = parseInt(ingresosStr) || 0;
+                        
+                        const resPerDay = daysActive > 0 ? (reservas / daysActive).toFixed(3) : 0;
+                        const incomePerDay = daysActive > 0 ? Math.round(ingresos / daysActive) : 0;
+                        const avgStay = reservas > 0 ? (noches / reservas).toFixed(2) : 0;
+                        
+                        return {
+                            nombre: promo['Nombre'],
+                            categoria: promo['Categoria'] || 'Unknown',
+                            descuento: promo['Descuento'],
+                            reservas,
+                            noches,
+                            ingresos,
+                            resPerDay: parseFloat(resPerDay),
+                            incomePerDay,
+                            avgStay: parseFloat(avgStay),
+                            daysActive
+                        };
+                    });
+
+                    renderAnalysis(analyzed, currentDate);
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('content').classList.remove('hidden');
+                } catch (e) {
+                    showError('Error parsing CSV: ' + e.message);
+                    document.getElementById('loading').classList.add('hidden');
+                }
+            }, 300);
+        }
+
+        function showError(msg) {
+            document.getElementById('errorContainer').innerHTML = 
+                `<div class="error-message">${msg}</div>`;
+        }
+
+        function renderAnalysis(promotions, currentDate) {
+            const byCategory = {};
+            promotions.forEach(p => {
+                if (!byCategory[p.categoria]) byCategory[p.categoria] = [];
+                byCategory[p.categoria].push(p);
+            });
+
+            const totalRes = promotions.reduce((sum, p) => sum + p.reservas, 0);
+            const totalIncome = promotions.reduce((sum, p) => sum + p.ingresos, 0);
+            const avgResPerDay = promotions.reduce((sum, p) => sum + p.resPerDay, 0) / promotions.length;
+
+            document.getElementById('metricsGrid').innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Total promotions</div>
+                    <div class="metric-value">${promotions.length}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total reservations</div>
+                    <div class="metric-value">${totalRes}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total income</div>
+                    <div class="metric-value">MXN ${(totalIncome / 1000000).toFixed(1)}M</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg res/day</div>
+                    <div class="metric-value">${avgResPerDay.toFixed(2)}</div>
+                </div>
+            `;
+
+            let catHTML = '';
+            Object.entries(byCategory).forEach(([cat, promos]) => {
+                let rowsHTML = `
+                    <div class="category-header">
+                        <div class="header-name">Promotion</div>
+                        <div class="header-metric">Res/Day</div>
+                        <div class="header-metric">Avg Stay</div>
+                        <div class="header-metric">Count</div>
+                    </div>
+                `;
+                promos.forEach(p => {
+                    let status = 'status-good';
+                    if (p.resPerDay < 0.15) status = p.resPerDay < 0.1 ? 'status-danger' : 'status-warning';
+                    rowsHTML += `
+                        <div class="promotion-row">
+                            <div class="promotion-name">${p.nombre}</div>
+                            <div class="promotion-metric">
+                                <span class="promotion-metric-label">Res/Day</span>
+                                <span class="promotion-metric-value">${p.resPerDay.toFixed(2)}</span>
+                            </div>
+                            <div class="promotion-metric">
+                                <span class="promotion-metric-label">Avg Stay</span>
+                                <span class="promotion-metric-value">${p.avgStay.toFixed(1)}n</span>
+                            </div>
+                            <div class="promotion-metric">
+                                <span class="status-badge ${status}">${p.reservas}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                catHTML += `
+                    <div class="category-section">
+                        <div class="category-title">${cat}</div>
+                        ${rowsHTML}
+                    </div>
+                `;
+            });
+            document.getElementById('categoriesContainer').innerHTML = catHTML;
+
+            const recommendations = generateRecommendations(promotions);
+            let recHTML = '<div class="recommendations-section"><div class="recommendations-title">5 Weekly Recommendations</div>';
+            recommendations.forEach((rec, idx) => {
+                const recClass = rec.priority === 'high' ? 'danger' : rec.priority === 'medium' ? 'warning' : 'success';
+                recHTML += `
+                    <div class="recommendation ${recClass}">
+                        <div class="rec-priority">Priority: ${rec.priority.toUpperCase()}</div>
+                        <div class="rec-number">${idx + 1}. ${rec.title}</div>
+                        <div class="rec-action"><strong>Action:</strong> ${rec.action}</div>
+                        <div class="rec-why"><strong>Why:</strong> ${rec.why}</div>
+                    </div>
+                `;
+            });
+            recHTML += '</div>';
+            document.getElementById('recommendationsContainer').innerHTML = recHTML;
+
+            document.getElementById('errorContainer').innerHTML = '';
+        }
+
+        function generateRecommendations(promotions) {
+            const recs = [];
+
+            promotions.forEach(p => {
+                if (p.resPerDay < 0.04 && p.categoria === 'Targeting') {
+                    recs.push({
+                        priority: 'high',
+                        title: `Discontinue ${p.nombre}`,
+                        action: `Go to Booking > ${p.categoria} > Deactivate`,
+                        why: `${p.resPerDay.toFixed(3)} res/day is essentially zero. Wastes inventory slot.`
+                    });
+                }
+            });
+
+            const portfolio = promotions.filter(p => p.categoria === 'Portafolio');
+            if (portfolio.length > 1) {
+                const sorted = portfolio.sort((a, b) => b.resPerDay - a.resPerDay);
+                if (sorted[sorted.length - 1].resPerDay < 0.1) {
+                    recs.push({
+                        priority: 'high',
+                        title: `Discontinue ${sorted[sorted.length - 1].nombre}`,
+                        action: `Deactivate in Booking > Portfolio Deals`,
+                        why: `${sorted[sorted.length - 1].resPerDay.toFixed(3)} res/day underperforms. Frees slot.`
+                    });
+                }
+            }
+
+            if (!promotions.find(p => p.categoria === 'Deep Deals')) {
+                recs.push({
+                    priority: 'high',
+                    title: 'Activate Deep Deals for June',
+                    action: `Identify weakest week. Activate Deep Deal with 30% discount for 2 days.`,
+                    why: `June is critical (22% occupancy). Deep Deals provide tactical impulse.`
+                });
+            }
+
+            const campaigns = promotions.filter(p => p.categoria === 'Campaña');
+            if (campaigns.length === 1 && campaigns[0].resPerDay < 0.02) {
+                recs.push({
+                    priority: 'medium',
+                    title: `Revalue or replace Campaign`,
+                    action: `Deactivate ${campaigns[0].nombre}, create June-focused Campaign.`,
+                    why: `Current: ${campaigns[0].resPerDay.toFixed(4)} res/day. Only 1 slot available.`
+                });
+            }
+
+            const targeting = promotions.filter(p => p.categoria === 'Targeting');
+            if (targeting.length > 0) {
+                const best = targeting.sort((a, b) => b.resPerDay - a.resPerDay)[0];
+                recs.push({
+                    priority: 'medium',
+                    title: `Monitor ${best.nombre} performance`,
+                    action: `Track for 2 more weeks. If >3 res/day, consider optimization.`,
+                    why: `Star performer at ${best.resPerDay.toFixed(2)} res/day (${best.daysActive} days old).`
+                });
+            }
+
+            if (recs.length < 5) {
+                recs.push({
+                    priority: 'low',
+                    title: 'Review Portfolio differentiation',
+                    action: `Verify each targets different arrival date ranges.`,
+                    why: `Prevent cannibalization between Portfolio Deals.`
+                });
+            }
+
+            return recs.slice(0, 5);
+        }
+
+        document.getElementById('dateInput').valueAsDate = new Date();
+    </script>
+</body>
+</html>
