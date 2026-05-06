@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Promotion Strategy Analyzer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0; 
+      padding: 0;
+      background: #f3f4f6;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    
+    header {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      padding: 30px 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { margin: 0 0 5px 0; font-size: 28px; }
+    header p { margin: 0; opacity: 0.9; font-size: 14px; }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #1f2937; }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .section h2 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: #1f2937;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: 5px;
+    }
+    textarea, input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { 
+      background: #d1d5db; 
+      cursor: not-allowed; 
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .metric-card {
+      background: #f9fafb;
+      border-left: 4px solid #2563eb;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .metric-card .label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+    .metric-card .value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 15px 0;
+    }
+    th {
+      background: #f3f4f6;
+      padding: 10px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #d1d5db;
+      color: #1f2937;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    tr:hover { background: #f9fafb; }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-star { background: #fef08a; color: #713f12; }
+    .status-excellent { background: #dcfce7; color: #15803d; }
+    .status-good { background: #dbeafe; color: #0c447c; }
+    .status-weak { background: #fed7aa; color: #7c2d12; }
+    .status-fail { background: #fecaca; color: #7f1d1d; }
+    
+    .recommendation-card {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-left: 4px solid #2563eb;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+    .recommendation-card .priority {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .priority-high { background: #fecaca; color: #7f1d1d; }
+    .priority-medium { background: #fed7aa; color: #7c2d12; }
+    .priority-low { background: #dbeafe; color: #0c447c; }
+    
+    .recommendation-card h3 {
+      margin: 10px 0 5px 0;
+      font-size: 15px;
+      color: #1f2937;
+    }
+    .recommendation-card p {
+      margin: 5px 0;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+    
+    .error { color: #dc2626; font-size: 13px; }
+    .success { color: #16a34a; font-size: 13px; }
+    
+    .progress-bar {
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #2563eb;
+      transition: width 0.3s;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .summary-item {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .summary-item .label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+    .summary-item .value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .upload-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: #f9fafb;
+      transition: all 0.2s;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    .upload-zone:hover {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+    .upload-zone.dragover {
+      border-color: #2563eb;
+      background: #dbeafe;
+    }
+    .upload-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .upload-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .upload-btn {
+      padding: 8px 16px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-btn:hover {
+      background: #1d4ed8;
+    }
+    
+    .file-info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #dcfce7;
+      border-left: 4px solid #16a34a;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #15803d;
+    }
+    
+    .file-error {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #991b1b;
+    }
+    
+    .hidden { display: none; }
+    
+    @media print {
+      body { background: white; }
+      .tabs, .button-group, textarea, input { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🎯 Booking Promotion Strategy Analyzer</h1>
+    <p>8-Phase Analysis Tool | Internal Benchmarking Methodology | Data-Driven Recommendations</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('input')">Input Data</button>
+    <button class="tab-btn" onclick="switchTab('phase1')">Phase 1-2: Ranking</button>
+    <button class="tab-btn" onclick="switchTab('phase3')">Phase 3: Categories</button>
+    <button class="tab-btn" onclick="switchTab('phase4')">Phase 4: Context</button>
+    <button class="tab-btn" onclick="switchTab('phase5-6')">Phase 5-6: Decision</button>
+    <button class="tab-btn" onclick="switchTab('phase7')">Phase 7: Recommendations</button>
+    <button class="tab-btn" onclick="switchTab('phase8')">Phase 8: Summary</button>
+    <button class="tab-btn" onclick="switchTab('export')">Export</button>
+  </div>
+
+  <!-- INPUT TAB -->
+  <div id="input" class="tab-content active">
+    <div class="section">
+      <h2>0. Today's Date</h2>
+      <div class="form-group">
+        <label>What is today's date? (Used to calculate active days for "Ahora" dates)</label>
+        <input type="date" id="todayDate" value="">
+      </div>
+      <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">This is essential for calculating days active when your CSV contains "Ahora" (today) as the end date.</p>
+      
+      <h2 style="margin-top: 25px;">1. Hotel Discovery Data (JSON)</h2>
+      
+      <!-- File Upload Zone -->
+      <div class="upload-zone" id="jsonDropZone" ondrop="handleJsonDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Drag & drop JSON file or click to browse</div>
+        <input type="file" id="jsonFile" accept=".json" onchange="handleJsonFile(event)" style="display: none;">
+        <button type="button" onclick="document.getElementById('jsonFile').click()" class="upload-btn">Choose File</button>
+      </div>
+      
+      <div style="text-align: center; color: #9ca3af; margin: 15px 0; font-size: 13px;">— OR —</div>
+      
+      <div class="form-group">
+        <label>Paste JSON manually:</label>
+        <textarea id="jsonInput" placeholder='{"propertyName":"Hotel X","bookingScore":8.9,...}'></textarea>
+      </div>
+      <div id="jsonStatus" style="font-size: 12px; margin-top: 5px;"></div>
+      
+      <h2 style="margin-top: 30px;">2. Booking Promotions (CSV)</h2>
+      
+      <!-- File Upload Zone -->
+      <div class="upload-zone" id="csvDropZone" ondrop="handleCsvDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <div class="upload-icon">📊</div>
+        <div class="upload-text">Drag & drop CSV file or click to browse</div>
+        <input type="file" id="csvFile" accept=".csv" onchange="handleCsvFile(event)" style="display: none;">
+        <button type="button" onclick="document.getElementById('csvFile').click()" class="upload-btn">Choose File</button>
+      </div>
+      
+      <div style="text-align: center; color: #9ca3af; margin: 15px 0; font-size: 13px;">— OR —</div>
+      
+      <div class="form-group">
+        <label>Paste CSV manually:</label>
+        <textarea id="csvInput" placeholder="Promo Name,Category,Discount%,Booking Period,Stay Dates,Reservations,Nights,ADR,Revenue"></textarea>
+      </div>
+      <div id="csvStatus" style="font-size: 12px; margin-top: 5px;"></div>
+      
+      <div class="button-group" style="margin-top: 25px;">
+        <button onclick="runAnalysis()">🚀 Run 8-Phase Analysis</button>
+        <button onclick="resetAll()">Clear All</button>
+      </div>
+      
+      <div id="inputError" class="error hidden"></div>
+      <div id="inputSuccess" class="success hidden"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 1-2: RANKING -->
+  <div id="phase1" class="tab-content">
+    <div class="section">
+      <h2>Phase 1-2: Data Extraction & Efficiency Ranking</h2>
+      <div id="hotelInfo"></div>
+      <div id="rankingTable"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 3: CATEGORIES -->
+  <div id="phase3" class="tab-content">
+    <div class="section">
+      <h2>Phase 3: Category Analysis</h2>
+      <div id="categoryAnalysis"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 4: CONTEXT -->
+  <div id="phase4" class="tab-content">
+    <div class="section">
+      <h2>Phase 4: Market Context Analysis</h2>
+      <div id="marketContext"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 5-6: DECISION -->
+  <div id="phase5-6" class="tab-content">
+    <div class="section">
+      <h2>Phase 5-6: Booking Algorithm & Decision Matrix</h2>
+      <div id="decisionMatrix"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 7: RECOMMENDATIONS -->
+  <div id="phase7" class="tab-content">
+    <div class="section">
+      <h2>Phase 7: 5 Prioritized Recommendations</h2>
+      <div id="recommendations"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 8: SUMMARY -->
+  <div id="phase8" class="tab-content">
+    <div class="section">
+      <h2>Phase 8: Executive Summary</h2>
+      <div id="executiveSummary"></div>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div id="export" class="tab-content">
+    <div class="section">
+      <h2>Export Results</h2>
+      <div class="button-group">
+        <button onclick="exportHTML()">📄 Download as HTML</button>
+        <button onclick="exportJSON()">📋 Download as JSON</button>
+        <button onclick="window.print()">🖨️ Print / PDF</button>
+        <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+      </div>
+      <div id="exportStatus"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let analysisData = null;
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// File handling functions
+function handleDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('dragover');
+}
+
+function handleJsonDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('dragover');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const file = files[0];
+    if (file.type === 'application/json' || file.name.endsWith('.json')) {
+      readJsonFile(file);
+    } else {
+      document.getElementById('jsonStatus').innerHTML = '<div class="file-error">❌ Please drop a JSON file</div>';
+    }
+  }
+}
+
+function handleCsvDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('dragover');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const file = files[0];
+    if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+      readCsvFile(file);
+    } else {
+      document.getElementById('csvStatus').innerHTML = '<div class="file-error">❌ Please drop a CSV file</div>';
+    }
+  }
+}
+
+function handleJsonFile(e) {
+  const files = e.target.files;
+  if (files.length > 0) {
+    readJsonFile(files[0]);
+  }
+}
+
+function handleCsvFile(e) {
+  const files = e.target.files;
+  if (files.length > 0) {
+    readCsvFile(files[0]);
+  }
+}
+
+function readJsonFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const content = e.target.result;
+      document.getElementById('jsonInput').value = content;
+      document.getElementById('jsonStatus').innerHTML = `<div class="file-info">✓ Loaded: ${file.name}</div>`;
+    } catch (error) {
+      document.getElementById('jsonStatus').innerHTML = `<div class="file-error">❌ Error reading file: ${error.message}</div>`;
+    }
+  };
+  reader.onerror = function() {
+    document.getElementById('jsonStatus').innerHTML = '<div class="file-error">❌ Error reading file</div>';
+  };
+  reader.readAsText(file);
+}
+
+function readCsvFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const content = e.target.result;
+      document.getElementById('csvInput').value = content;
+      const lines = content.trim().split('\n').length;
+      document.getElementById('csvStatus').innerHTML = `<div class="file-info">✓ Loaded: ${file.name} (${lines} rows)</div>`;
+    } catch (error) {
+      document.getElementById('csvStatus').innerHTML = `<div class="file-error">❌ Error reading file: ${error.message}</div>`;
+    }
+  };
+  reader.onerror = function() {
+    document.getElementById('csvStatus').innerHTML = '<div class="file-error">❌ Error reading file</div>';
+  };
+  reader.readAsText(file);
+}
+
+// Language-aware header mapping
+const headerMap = {
+  // Spanish → English (including user's exact headers)
+  'Nombre': 'Promo Name',
+  'Nombre de Promoción': 'Promo Name',
+  'Promoción': 'Promo Name',
+  'Promo': 'Promo Name',
+  
+  'Categoría': 'Category',
+  'Categoria': 'Category',
+  'Portafolio': 'Category',
+  
+  'Descuento': 'Discount%',
+  'Descuento%': 'Discount%',
+  'Descuento %': 'Discount%',
+  'Porcentaje': 'Discount%',
+  
+  'Período de Reserva': 'Booking Period',
+  'Periodo de Reserva': 'Booking Period',
+  'Periodo de reserva': 'Booking Period',
+  
+  'Fechas de la Estadía': 'Stay Dates',
+  'Fechas de la Estadia': 'Stay Dates',
+  'Fechas de la estancia': 'Stay Dates',
+  
+  'Reservas': 'Reservations',
+  'Reservaciones': 'Reservations',
+  
+  'Noches': 'Nights',
+  
+  'Tarifa Media Diaria': 'ADR',
+  'Tarifa media diaria': 'ADR',
+  'Tarifa Diaria': 'ADR',
+  'ADR': 'ADR',
+  
+  'Ingresos': 'Revenue',
+  'Ingresos Totales': 'Revenue',
+  'Ingreso': 'Revenue',
+  'Revenue': 'Revenue'
+};
+
+function normalizeHeader(header) {
+  const trimmed = header.trim();
+  return headerMap[trimmed] || trimmed;
+}
+
+function cleanNumber(value) {
+  // Remove currency symbols and convert Spanish format (. for thousands, , for decimals)
+  let cleaned = value.toString().trim();
+  
+  // Remove common currency prefixes
+  cleaned = cleaned.replace(/^[A-Z]{3}\s*/i, ''); // MXN, USD, EUR, etc.
+  
+  // Handle Spanish number format: 1.234,56 → 1234.56
+  if (cleaned.includes(',')) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  }
+  
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
+function parseDateString(dateStr) {
+  // Handle "Ahora" (today) reference
+  if (dateStr.toLowerCase().includes('ahora') || dateStr.toLowerCase().includes('siempre')) {
+    return new Date(document.getElementById('todayDate').value);
+  }
+  
+  // Parse "10 abr 2026" format
+  const monthNames = {
+    'ene': 0, 'enero': 0,
+    'feb': 1, 'febrero': 1,
+    'mar': 2, 'marzo': 2,
+    'abr': 3, 'abril': 3,
+    'may': 4, 'mayo': 4,
+    'jun': 5, 'junio': 5,
+    'jul': 6, 'julio': 6,
+    'ago': 7, 'agosto': 7,
+    'sep': 8, 'septiembre': 8,
+    'oct': 9, 'octubre': 9,
+    'nov': 10, 'noviembre': 10,
+    'dic': 11, 'diciembre': 11
+  };
+  
+  const parts = dateStr.trim().split(/\s+/);
+  if (parts.length >= 3) {
+    const day = parseInt(parts[0]);
+    const month = monthNames[parts[1].toLowerCase()];
+    const year = parseInt(parts[2]);
+    
+    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+      return new Date(year, month, day);
+    }
+  }
+  
+  // Fallback: try standard date parsing
+  return new Date(dateStr);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const rawHeaders = lines[0].split(',').map(h => h.trim());
+  const headers = rawHeaders.map(h => normalizeHeader(h));
+  const rows = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    
+    // Better CSV parsing that handles quoted fields
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let j = 0; j < lines[i].length; j++) {
+      const char = lines[i][j];
+      const nextChar = lines[i][j + 1];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim());
+    
+    const row = {};
+    headers.forEach((h, idx) => {
+      let val = values[idx] || '';
+      val = val.replace(/^"|"$/g, ''); // Remove quotes
+      row[h] = val;
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function calculateMetrics(promotions) {
+  const todayStr = document.getElementById('todayDate').value;
+  if (!todayStr) {
+    throw new Error('Please select today\'s date');
+  }
+  
+  const today = new Date(todayStr);
+  
+  return promotions.map(promo => {
+    const bookingPeriodStr = promo['Booking Period'] || '';
+    const startDateStr = bookingPeriodStr.split('-')[0];
+    const bookingStart = parseDateString(startDateStr);
+    
+    const daysActive = Math.max(1, Math.floor((today - bookingStart) / (1000 * 60 * 60 * 24)));
+    
+    const reservations = cleanNumber(promo['Reservations']) || 0;
+    const nights = cleanNumber(promo['Nights']) || 0;
+    const revenue = cleanNumber(promo['Revenue']) || 0;
+    
+    return {
+      ...promo,
+      daysActive,
+      resPerDay: (reservations / daysActive).toFixed(2),
+      revPerDay: (revenue / daysActive).toFixed(2),
+      avgStay: reservations > 0 ? (nights / reservations).toFixed(1) : 0
+    };
+  }).sort((a, b) => b.resPerDay - a.resPerDay);
+}
+
+function getStatus(percentage) {
+  if (percentage >= 90) return { label: '⭐ STAR', class: 'status-star' };
+  if (percentage >= 45) return { label: '✓ EXCELLENT', class: 'status-excellent' };
+  if (percentage >= 22) return { label: '✓ GOOD', class: 'status-good' };
+  if (percentage >= 1) return { label: '❌ WEAK', class: 'status-weak' };
+  return { label: '❌ FAIL', class: 'status-fail' };
+}
+
+function runAnalysis() {
+  try {
+    const todayDate = document.getElementById('todayDate').value;
+    const jsonText = document.getElementById('jsonInput').value.trim();
+    const csvText = document.getElementById('csvInput').value.trim();
+    
+    if (!todayDate) {
+      document.getElementById('inputError').textContent = 'Please select today\'s date';
+      document.getElementById('inputError').classList.remove('hidden');
+      return;
+    }
+    
+    if (!jsonText || !csvText) {
+      document.getElementById('inputError').textContent = 'Please paste both JSON and CSV data';
+      document.getElementById('inputError').classList.remove('hidden');
+      return;
+    }
+    
+    const hotelData = JSON.parse(jsonText);
+    const promotions = parseCSV(csvText);
+    
+    if (promotions.length === 0) {
+      throw new Error('No promotions found in CSV');
+    }
+    
+    const metricsPromos = calculateMetrics(promotions);
+    const bestPromo = metricsPromos[0];
+    const baseline = parseFloat(bestPromo.resPerDay);
+    
+    analysisData = {
+      hotel: hotelData,
+      promotions: metricsPromos,
+      baseline,
+      bestPromo
+    };
+    
+    document.getElementById('inputError').classList.add('hidden');
+    document.getElementById('inputSuccess').textContent = '✓ Analysis completed. Navigate to other tabs.';
+    document.getElementById('inputSuccess').classList.remove('hidden');
+    
+    generatePhase1();
+    generatePhase3();
+    generatePhase4();
+    generatePhase5_6();
+    generatePhase7();
+    generatePhase8();
+    
+  } catch (error) {
+    document.getElementById('inputError').textContent = 'Error: ' + error.message;
+    document.getElementById('inputError').classList.remove('hidden');
+  }
+}
+
+function generatePhase1() {
+  const h = analysisData.hotel;
+  const proms = analysisData.promotions;
+  
+  let html = '<div class="summary-grid">';
+  html += `<div class="summary-item"><div class="label">Property</div><div class="value">${h.propertyName}</div></div>`;
+  html += `<div class="summary-item"><div class="label">Location</div><div class="value">${h.city}, ${h.country}</div></div>`;
+  html += `<div class="summary-item"><div class="label">Rooms</div><div class="value">${h.numRooms}</div></div>`;
+  html += `<div class="summary-item"><div class="label">ADR</div><div class="value">${h.adrBooking} ${h.currency}</div></div>`;
+  html += `<div class="summary-item"><div class="label">Occupancy</div><div class="value">${h.occupancyBooking}% / ${h.targetOccupancy}%</div></div>`;
+  html += `<div class="summary-item"><div class="label">Avg Stay</div><div class="value">${h.avgStay} nights</div></div>`;
+  html += '</div>';
+  
+  html += '<h3 style="margin-top: 20px;">Efficiency Ranking (% of Baseline)</h3>';
+  html += '<table><thead><tr><th>Rank</th><th>Promotion</th><th>Category</th><th>Res/Day</th><th>% Baseline</th><th>Status</th></tr></thead><tbody>';
+  
+  proms.forEach((p, idx) => {
+    const percentage = ((parseFloat(p.resPerDay) / analysisData.baseline) * 100).toFixed(0);
+    const status = getStatus(percentage);
+    html += `<tr>
+      <td>${idx + 1}</td>
+      <td>${p['Promo Name'] || p['Name']}</td>
+      <td>${p['Category']}</td>
+      <td>${p.resPerDay}</td>
+      <td>${percentage}%</td>
+      <td><span class="status-badge ${status.class}">${status.label}</span></td>
+    </tr>`;
+  });
+  
+  html += '</tbody></table>';
+  document.getElementById('hotelInfo').innerHTML = html;
+}
+
+function generatePhase3() {
+  const proms = analysisData.promotions;
+  const categories = {};
+  
+  proms.forEach(p => {
+    const cat = p['Category'];
+    if (!categories[cat]) {
+      categories[cat] = [];
+    }
+    categories[cat].push(p);
+  });
+  
+  let html = '';
+  Object.keys(categories).forEach(catName => {
+    const catPromos = categories[catName];
+    const avgRes = (catPromos.reduce((s, p) => s + parseFloat(p.resPerDay), 0) / catPromos.length).toFixed(2);
+    const leader = catPromos[0];
+    const laggard = catPromos[catPromos.length - 1];
+    
+    html += `<div class="metric-card">
+      <div class="label"><strong>${catName}</strong></div>
+      <div class="value">Avg: ${avgRes} res/day | Promos: ${catPromos.length}</div>
+      <div class="value" style="font-size: 12px; margin-top: 5px;">
+        Leader: ${leader['Promo Name'] || leader['Name']} (${leader.resPerDay} res/day)<br>
+        Laggard: ${laggard['Promo Name'] || laggard['Name']} (${laggard.resPerDay} res/day)
+      </div>
+    </div>`;
+  });
+  
+  document.getElementById('categoryAnalysis').innerHTML = html || '<p>No categories found</p>';
+}
+
+function generatePhase4() {
+  const h = analysisData.hotel;
+  const occGap = h.targetOccupancy - h.occupancyBooking;
+  const roomsPerMonth = h.numRooms * 30;
+  const targetNights = (h.targetOccupancy / 100) * roomsPerMonth;
+  const currentNights = (h.occupancyBooking / 100) * roomsPerMonth;
+  const gapNights = targetNights - currentNights;
+  const revenueGap = gapNights * h.adrBooking;
+  
+  let html = `
+    <div class="metric-card">
+      <div class="label">Occupancy Gap</div>
+      <div class="value">${occGap}% (${gapNights.toFixed(0)} nights/month)</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Revenue Opportunity</div>
+      <div class="value">${h.currency} ${revenueGap.toFixed(0)}/month (${(revenueGap * 12).toFixed(0)}/year)</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Channel Dependency</div>
+      <div class="value">Booking: ${h.bookingPercent}% | OTAs: ${h.otasPercent}% | Direct: ${h.directPercent}%</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Controllable Revenue</div>
+      <div class="value">${h.bookingPercent}% via Booking + ${h.otasPercent}% via OTA strategy = ${h.bookingPercent + h.otasPercent}%</div>
+    </div>
+  `;
+  
+  document.getElementById('marketContext').innerHTML = html;
+}
+
+function generatePhase5_6() {
+  const proms = analysisData.promotions;
+  
+  let html = '<table><thead><tr><th>Promo</th><th>Res/Day</th><th>% Base</th><th>Decision</th></tr></thead><tbody>';
+  
+  proms.forEach(p => {
+    const percentage = parseFloat(((parseFloat(p.resPerDay) / analysisData.baseline) * 100).toFixed(0));
+    let decision = 'MONITOR';
+    
+    if (percentage >= 90) decision = 'MONITOR';
+    else if (percentage >= 45) decision = 'OPTIMIZE';
+    else if (percentage >= 22) decision = 'ANALYZE';
+    else if (percentage > 1) decision = 'ANALYZE';
+    else decision = 'KILL';
+    
+    html += `<tr>
+      <td>${p['Promo Name'] || p['Name']}</td>
+      <td>${p.resPerDay}</td>
+      <td>${percentage}%</td>
+      <td><span class="status-badge ${decision === 'KILL' ? 'status-fail' : decision === 'ANALYZE' ? 'status-weak' : 'status-excellent'}">${decision}</span></td>
+    </tr>`;
+  });
+  
+  html += '</tbody></table>';
+  document.getElementById('decisionMatrix').innerHTML = html;
+}
+
+function generatePhase7() {
+  const proms = analysisData.promotions;
+  const recommendations = [];
+  
+  // Find killable promos
+  proms.forEach((p, idx) => {
+    const percentage = parseFloat(((parseFloat(p.resPerDay) / analysisData.baseline) * 100).toFixed(0));
+    if (percentage < 1 && idx <= 2) {
+      recommendations.push({
+        priority: 'HIGH',
+        title: `Kill "${p['Promo Name'] || p['Name']}"`,
+        metric: `${p.resPerDay} res/day (${percentage}% of baseline)`,
+        reason: 'Low conversion signal damages Booking ranking'
+      });
+    }
+  });
+  
+  // Find optimizable promos
+  proms.slice(0, 5).forEach(p => {
+    const percentage = parseFloat(((parseFloat(p.resPerDay) / analysisData.baseline) * 100).toFixed(0));
+    if (percentage >= 45 && percentage < 90) {
+      recommendations.push({
+        priority: 'MEDIUM',
+        title: `Optimize "${p['Promo Name'] || p['Name']}"`,
+        metric: `${p.resPerDay} res/day (${percentage}% of baseline)`,
+        reason: 'Opportunity to improve toward STAR status'
+      });
+    }
+  });
+  
+  // Fill with monitoring recommendations
+  while (recommendations.length < 5) {
+    const p = proms[recommendations.length % proms.length];
+    const percentage = parseFloat(((parseFloat(p.resPerDay) / analysisData.baseline) * 100).toFixed(0));
+    recommendations.push({
+      priority: 'LOW',
+      title: `Monitor "${p['Promo Name'] || p['Name']}"`,
+      metric: `${p.resPerDay} res/day (${percentage}% of baseline)`,
+      reason: 'Watch for performance decay'
+    });
+  }
+  
+  let html = '';
+  recommendations.slice(0, 5).forEach((rec, idx) => {
+    const priorityClass = `priority-${rec.priority.toLowerCase()}`;
+    html += `
+      <div class="recommendation-card">
+        <div class="priority ${priorityClass}">${rec.priority} PRIORITY</div>
+        <h3>#${idx + 1}: ${rec.title}</h3>
+        <p><strong>Metric:</strong> ${rec.metric}</p>
+        <p><strong>Why:</strong> ${rec.reason}</p>
+      </div>
+    `;
+  });
+  
+  document.getElementById('recommendations').innerHTML = html;
+}
+
+function generatePhase8() {
+  const h = analysisData.hotel;
+  const proms = analysisData.promotions;
+  const best = proms[0];
+  const worst = proms[proms.length - 1];
+  
+  let html = `
+    <h3>Current State</h3>
+    <div class="metric-card">
+      <div class="label">Best Performer</div>
+      <div class="value">${best['Promo Name'] || best['Name']}: ${best.resPerDay} res/day</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Average Performance</div>
+      <div class="value">${(proms.reduce((s, p) => s + parseFloat(p.resPerDay), 0) / proms.length).toFixed(2)} res/day</div>
+    </div>
+    
+    <h3 style="margin-top: 20px;">Critical Finding</h3>
+    <div class="metric-card">
+      <div class="value">Hotel has occupancy gap of ${h.targetOccupancy - h.occupancyBooking}% (${((h.targetOccupancy - h.occupancyBooking) * h.numRooms * 30 / 100).toFixed(0)} nights/month)</div>
+    </div>
+    
+    <h3 style="margin-top: 20px;">Opportunity</h3>
+    <div class="metric-card">
+      <div class="value">Implementing the 5 recommendations could increase Booking bookings by 15-25%, worth ${(((h.targetOccupancy - h.occupancyBooking) * h.numRooms * 30 / 100) * h.adrBooking * 12 * 0.20).toFixed(0)} ${h.currency}/year</div>
+    </div>
+    
+    <h3 style="margin-top: 20px;">Next Steps</h3>
+    <div class="metric-card">
+      <div class="value">
+        Week 1: Kill low-performing promos<br>
+        Week 2-3: Optimize mid-range performers<br>
+        Week 4: Monitor and measure impact<br>
+        Month 2+: Iterate based on results
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('executiveSummary').innerHTML = html;
+}
+
+function exportHTML() {
+  const allTabs = document.querySelectorAll('.tab-content');
+  let content = '<h1>Booking Promotion Strategy Analysis Report</h1>';
+  
+  allTabs.forEach(tab => {
+    if (tab.id !== 'input' && tab.id !== 'export') {
+      content += tab.innerHTML;
+    }
+  });
+  
+  const blob = new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Analysis Report</title><style>body{font-family:sans-serif;margin:20px;}</style></head><body>${content}</body></html>`], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'booking_analysis_report.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(analysisData, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'booking_analysis_data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyToClipboard() {
+  const text = JSON.stringify(analysisData, null, 2);
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('exportStatus').innerHTML = '<div class="success">✓ Copied to clipboard</div>';
+    setTimeout(() => document.getElementById('exportStatus').innerHTML = '', 2000);
+  });
+}
+
+function resetAll() {
+  document.getElementById('todayDate').value = '';
+  document.getElementById('jsonInput').value = '';
+  document.getElementById('csvInput').value = '';
+  document.getElementById('jsonFile').value = '';
+  document.getElementById('csvFile').value = '';
+  document.getElementById('jsonStatus').innerHTML = '';
+  document.getElementById('csvStatus').innerHTML = '';
+  analysisData = null;
+  document.getElementById('inputSuccess').classList.add('hidden');
+  document.getElementById('inputError').classList.add('hidden');
+}
+</script>
+
+</body>
+</html>
